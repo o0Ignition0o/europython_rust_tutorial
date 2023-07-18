@@ -1,18 +1,19 @@
-fn say_hi(name: String) {
-    println!("Hi {}!", name);
+use axum::{routing::get, Router};
+use std::net::SocketAddr;
+
+async fn hello() -> &'static str {
+    "Hello, World!"
 }
 
-fn say_hi_borrow(name: &String) {
-    println!("Hi {}!", name);
-}
+#[tokio::main]
+async fn main() {
+    let app = Router::new().route("/", get(hello));
 
-fn say_hi_mutable_borrow(name: &mut String) {
-    *name = format!("Hi how you doin?");
-}
-
-fn main() {
-    let mut jeremy = "jeremy".to_string();
-    say_hi_mutable_borrow(&mut jeremy);
-    say_hi_borrow(&jeremy);
-    dbg!(jeremy);
+    // run it
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    println!("listening on {}", addr);
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
